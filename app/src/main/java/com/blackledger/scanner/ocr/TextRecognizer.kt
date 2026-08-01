@@ -16,8 +16,7 @@ class TextRecognizer {
         return suspendCancellableCoroutine { continuation ->
             recognizer.process(image)
                 .addOnSuccessListener { visionText ->
-                    val resultText = visionText.text
-                    continuation.resume(resultText)
+                    continuation.resume(visionText.text)
                 }
                 .addOnFailureListener { e ->
                     continuation.resumeWithException(e)
