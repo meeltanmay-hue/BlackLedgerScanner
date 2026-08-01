@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.blackledger.scanner.capture.CaptureService
 import com.blackledger.scanner.data.AppDatabase
 import com.blackledger.scanner.ocr.TextRecognizer
@@ -62,6 +63,7 @@ fun MainScreen(onCaptureClick: () -> Unit) {
     val context = LocalContext.current
     val db = remember { AppDatabase.getInstance(context) }
     val repository = remember { DataRepository(db.allianceDao()) }
+    val scope = rememberCoroutineScope()
 
     var alliances by remember { mutableStateOf(emptyList<com.blackledger.scanner.data.AllianceEntity>()) }
     var allianceCount by remember { mutableStateOf(0) }
@@ -69,7 +71,7 @@ fun MainScreen(onCaptureClick: () -> Unit) {
     var captureResult by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        lifecycleScope.launch {
+        scope.launch {
             allianceCount = repository.getAllianceCount()
             playerCount = repository.getPlayerCount()
             repository.getAllAlliances().collect { list ->
@@ -81,7 +83,7 @@ fun MainScreen(onCaptureClick: () -> Unit) {
     DisposableEffect(Unit) {
         CaptureService.onImageCaptured = { bitmap ->
             if (bitmap != null) {
-                lifecycleScope.launch {
+                scope.launch {
                     try {
                         val recognizer = TextRecognizer()
                         val text = recognizer.recognizeText(bitmap)
